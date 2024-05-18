@@ -1,0 +1,7 @@
+---
+site_name: Site 1
+dns_domain: site1.example.com
+site_cidr: 10.0.1.0/24
+
+ansible_python_interpreter: python3
+...

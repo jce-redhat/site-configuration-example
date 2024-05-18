@@ -1,0 +1,47 @@
+---
+- name: Validate site network device variables
+  hosts: network
+  gather_facts: false
+
+  vars:
+    license_file_path: "{{ playbook_dir }}/files/licenses"
+
+  tasks:
+    - name: Validate inventory variables
+      delegate_to: localhost
+      block:
+        - name: Verify each FQDN is in the DNS domain
+          ansible.builtin.assert:
+            that: inventory_hostname.split('.')[1:] | join('.') == hostvars[inventory_hostname].dns_domain
+            fail_msg: "FQDN {{ inventory_hostname }} does not match domain {{ hostvars[inventory_hostname].dns_domain }}"
+            quiet: true
+
+        - name: Validate site CIDR
+          ansible.builtin.assert:
+            that: hostvars[inventory_hostname].site_cidr | ansible.utils.ipsubnet
+          run_once: true
+
+        - name: Verify each IP address is in the site CIDR
+          ansible.builtin.assert:
+            that: hostvars[inventory_hostname].ip_address | ansible.utils.ipaddr(hostvars[inventory_hostname].site_cidr)
+            fail_msg: "IP address {{ hostvars[inventory_hostname].ip_address }} not found in {{ hostvars[inventory_hostname].site_cidr }}"
+            quiet: true
+
+        - name: Validate each MAC address
+          ansible.builtin.assert:
+            that: hostvars[inventory_hostname].mac_address | ansible.utils.macaddr
+            fail_msg: "MAC address {{ hostvars[inventory_hostname].mac_address }} is not valid"
+            quiet: true
+
+        - name: Check existence of license file for each device serial number
+          ansible.builtin.stat:
+            path: '{{ license_file_path }}/{{ hostvars[inventory_hostname].serial_number }}'
+          register: _license_file
+
+        - name: Fail if license file does not exist
+          ansible.builtin.assert:
+            that: _license_file.stat.exists
+            fail_msg: "License file for serial number '{{ hostvars[inventory_hostname].serial_number }}' does not exist"
+            quiet: true
+
+...

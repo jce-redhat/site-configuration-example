@@ -1,0 +1,67 @@
+---
+- name: Validate a site YAML file
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    license_file_path: "{{ playbook_dir }}/files/licenses"
+
+  tasks:
+    - name: Set site YAML file fact
+      ansible.builtin.set_fact:
+        _site_yaml: "{{ playbook_dir }}/sites/{{ site_name | default('site1') }}.yml"
+
+    - name: Check existence of site YAML
+      ansible.builtin.stat:
+        path: "{{ _site_yaml }}"
+      register: _site_yaml_file
+
+    - name: Fail if site YAML does not exist
+      ansible.builtin.assert:
+        that: _site_yaml_file.stat.exists
+        fail_msg: "Missing file {{ _site_yaml }}"
+
+    - name: Read in site YAML variables
+      ansible.builtin.include_vars:
+        file: "{{ _site_yaml }}"
+        name: site_info
+
+    - name: Verify each FQDN is in the DNS domain
+      ansible.builtin.assert:
+        that: item.fqdn.split('.')[1:] | join('.') == site_info.dns_domain
+        fail_msg: "FQDN '{{ item.fqdn }}' does not match domain '{{ site_info.dns_domain }}'"
+        quiet: true
+      loop: "{{ site_info.network_devices }}"
+
+    - name: Validate site CIDR
+      ansible.builtin.assert:
+        that: site_info.site_cidr | ansible.utils.ipsubnet
+
+    - name: Verify each IP address is in the site CIDR
+      ansible.builtin.assert:
+        that: item.ip_address | ansible.utils.ipaddr(site_info.site_cidr)
+        fail_msg: "IP address '{{ item.ip_address }}' not found in '{{ site_info.site_cidr }}'"
+        quiet: true
+      loop: "{{ site_info.network_devices }}"
+
+    - name: Validate each MAC address
+      ansible.builtin.assert:
+        that: item.mac_address | ansible.utils.macaddr
+        fail_msg: "MAC address '{{ item.mac_address }}' is not valid"
+        quiet: true
+      loop: "{{ site_info.network_devices }}"
+
+    - name: Check existence of license file for each device serial number
+      ansible.builtin.stat:
+        path: '{{ license_file_path }}/{{ item.serial_number }}'
+      loop: "{{ site_info.network_devices }}"
+      register: _license_file
+
+    - name: Fail if license file does not exist
+      ansible.builtin.assert:
+        that: item.stat.exists
+        fail_msg: "License file for serial number '{{ item.item.serial_number }}' does not exist"
+        quiet: true
+      loop: "{{ _license_file.results }}"
+
+...

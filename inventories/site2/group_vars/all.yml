@@ -1,0 +1,6 @@
+---
+site_name: Site 2
+dns_domain: site2.example.com
+site_cidr: 10.0.2.0/24
+
+...

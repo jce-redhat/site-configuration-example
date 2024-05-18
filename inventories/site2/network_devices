@@ -1,0 +1,11 @@
+[network_spine]
+spine01.site2.example.com
+spine02.site1.example.com
+
+[network_leaf]
+leaf01.site2.example.com
+leaf02.site2.example.com
+
+[network:children]
+network_spine
+network_leaf
