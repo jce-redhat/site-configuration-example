@@ -46,6 +46,14 @@
         state: present
         provider: "{{ nios_provider }}"
 
+    - name: Configure network object
+      infoblox.nios_modules.nios_network:
+        network: "{{ hostvars[inventory_hostname].site_cidr }}"
+        comment: Managed by Ansible, do not modify manually
+        state: present
+        provider: "{{ nios_provider }}"
+      run_once: true
+
     - name: Configure DHCP fixed address reservation
       infoblox.nios_modules.nios_fixed_address:
         name: "{{ inventory_hostname }}"
