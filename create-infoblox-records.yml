@@ -1,0 +1,59 @@
+---
+- name: Create site network device records in Infoblox
+  hosts: network
+  connection: local
+  gather_facts: false
+
+  vars:
+    nios_provider:
+      host: "{{ lookup('env', 'INFOBLOX_HOST') }}"
+      username: "{{ lookup('env', 'INFOBLOX_USERNAME') }}"
+      password: "{{ lookup('env', 'INFOBLOX_PASSWORD') }}"
+
+  tasks:
+    - name: Configure site DNS zone
+      infoblox.nios_modules.nios_zone:
+        name: "{{ hostvars[inventory_hostname].dns_domain }}"
+        extattrs:
+          Site: "{{ hostvars[inventory_hostname].site_name }}"
+        comment: Managed by Ansible, do not modify manually
+        state: present
+        provider: "{{ nios_provider }}"
+      run_once: true
+
+    - name: Configure site CIDR reverse zone
+      infoblox.nios_modules.nios_zone:
+        name: "{{ hostvars[inventory_hostname].site_cidr }}"
+        zone_format: IPV4
+        comment: Managed by Ansible, do not modify manually
+        state: present
+        provider: "{{ nios_provider }}"
+      run_once: true
+
+    - name: Configure site A records
+      infoblox.nios_modules.nios_a_record:
+        name: "{{ inventory_hostname }}"
+        ipv4addr: "{{ hostvars[inventory_hostname].ip_address }}"
+        comment: Managed by Ansible, do not modify manually
+        state: present
+        provider: "{{ nios_provider }}"
+
+    - name: Configure site PTR records
+      infoblox.nios_modules.nios_ptr_record:
+        ipv4addr: "{{ hostvars[inventory_hostname].ip_address }}"
+        ptrdname: "{{ inventory_hostname }}"
+        comment: Managed by Ansible, do not modify manually
+        state: present
+        provider: "{{ nios_provider }}"
+
+    - name: Configure DHCP fixed address reservation
+      infoblox.nios_modules.nios_fixed_address:
+        name: "{{ inventory_hostname }}"
+        ipaddr: "{{ hostvars[inventory_hostname].ip_address }}"
+        mac: "{{ hostvars[inventory_hostname].mac_address }}"
+        network: "{{ hostvars[inventory_hostname].site_cidr }}"
+        comment: Managed by Ansible, do not modify manually
+        state: present
+        provider: "{{ nios_provider }}"
+
+...
