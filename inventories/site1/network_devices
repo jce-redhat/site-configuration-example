@@ -1,10 +1,10 @@
 [network_spine]
-spine01.site1.example.com
-spine02.site1.example.com
+spine01.site1.example.org
+spine02.site1.example.org
 
 [network_leaf]
-leaf01.site1.example.com
-leaf02.site1.example.com
+leaf01.site1.example.org
+leaf02.site1.example.org
 
 [network:children]
 network_spine

@@ -1,11 +1,11 @@
 ---
 name: Site 2
-dns_domain: site2.example.com
+dns_domain: site2.example.org
 site_cidr: 10.0.2.0/24
 
 network_devices:
   - name: spine01
-    fqdn: spine01.site2.example.com
+    fqdn: spine01.site2.example.org
     ip_address: 10.0.2.1/24
     mac_address: 22:33:44:55:66:77
     vendor: Juniper
@@ -14,7 +14,7 @@ network_devices:
       - hash01
       - hash02
   - name: spine02
-    fqdn: spine02.site2.example.com
+    fqdn: spine02.site3.example.org
     ip_address: 10.0.3.2/24
     mac_address: 22:33:44:55:66:88
     vendor: Juniper
@@ -33,7 +33,7 @@ network_devices:
       - hash01
       - hash02
   - name: leaf02
-    fqdn: leaf02.site2.example.com
+    fqdn: leaf02.site2.example.org
     ip_address: 10.0.2.12/24
     mac_address: 22:33:44:bbcc:ee
     vendor: Juniper
