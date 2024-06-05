@@ -1,0 +1,11 @@
+---
+- name: List network device addresses
+  hosts: network
+  gather_facts: false
+
+  tasks:
+    - name: Display device IP address
+      ansible.builtin.debug:
+        msg: '{{ inventory_hostname }}: {{ hostvars[inventory_hostname].ip_address }}'
+
+...

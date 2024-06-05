@@ -1,5 +1,5 @@
 ---
-ip_address: 10.0.1.11
+ip_address: '{{ site_cidr | ansible.utils.nthhost(11) }}'
 mac_address: 00:11:22:aa:bb:cc
 vendor: Juniper
 serial_number: SN0003
