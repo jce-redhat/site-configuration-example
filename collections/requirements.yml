@@ -1,5 +1,6 @@
 ---
 collections:
+  - name: amazon.aws
   - name: ansible.utils
   - name: infoblox.nios_modules
 
